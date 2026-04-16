@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quanment — Quantity Measurement</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<!-- HERO (shown only when not logged in) -->
+<div id="hero-section" style="display:none">
+  <div class="hero">
+    <h1>Measure. Convert.<br><span>Calculate anything.</span></h1>
+    <p>A powerful unit conversion and arithmetic tool for length, weight, volume and temperature.</p>
+    <a href="register.html" class="btn btn-primary btn-lg">Get started free</a>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-section" style="display:none">
+  <div class="container page">
+
+    <!-- Type selector -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-body" style="padding:1.25rem">
+        <p class="form-label" style="margin-bottom:.75rem">Measurement type</p>
+        <div class="type-grid" id="type-grid"></div>
+      </div>
+    </div>
+
+    <!-- Operation tabs -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-body" style="padding:1.25rem">
+        <div class="op-tabs" id="op-tabs">
+          <button class="op-tab active" data-op="convert">Convert</button>
+          <button class="op-tab" data-op="add">Add</button>
+          <button class="op-tab" data-op="subtract">Subtract</button>
+          <button class="op-tab" data-op="divide">Divide</button>
+          <button class="op-tab" data-op="compare">Compare</button>
+          <button class="op-tab" data-op="save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation panels -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <p class="card-title" id="op-title">Convert</p>
+          <p class="card-sub" id="op-desc">Convert a value from one unit to another</p>
+        </div>
+        <span id="op-badge" class="badge badge-blue">convert</span>
+      </div>
+      <div class="card-body">
+
+        <!-- CONVERT -->
+        <div id="panel-convert" class="op-panel">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">From value</label>
+              <input class="form-input input-number" id="cv-val" type="number" value="1" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">From unit</label>
+              <select class="form-select" id="cv-from"></select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.75rem">
+            <label class="form-label">To unit</label>
+            <select class="form-select" id="cv-to"></select>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-primary" id="cv-btn" onclick="doConvert()">Convert →</button>
+          </div>
+          <div class="divider"></div>
+          <div class="result-box" id="cv-result">
+            <span class="result-empty">Result will appear here</span>
+          </div>
+        </div>
+
+        <!-- ADD -->
+        <div id="panel-add" class="op-panel" style="display:none">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Value 1</label>
+              <input class="form-input input-number" id="add-v1" type="number" value="1" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 1</label>
+              <select class="form-select" id="add-u1"></select>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:.75rem">
+            <div class="form-group">
+              <label class="form-label">Value 2</label>
+              <input class="form-input input-number" id="add-v2" type="number" value="1" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 2</label>
+              <select class="form-select" id="add-u2"></select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.75rem">
+            <label class="form-label">Result unit <span style="color:var(--muted)">(optional — defaults to unit 1)</span></label>
+            <select class="form-select" id="add-ru"></select>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-success" onclick="doAdd()">+ Add</button>
+          </div>
+          <div class="divider"></div>
+          <div class="result-box" id="add-result"><span class="result-empty">Result will appear here</span></div>
+        </div>
+
+        <!-- SUBTRACT -->
+        <div id="panel-subtract" class="op-panel" style="display:none">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Value 1</label>
+              <input class="form-input input-number" id="sub-v1" type="number" value="2" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 1</label>
+              <select class="form-select" id="sub-u1"></select>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:.75rem">
+            <div class="form-group">
+              <label class="form-label">Value 2</label>
+              <input class="form-input input-number" id="sub-v2" type="number" value="1" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 2</label>
+              <select class="form-select" id="sub-u2"></select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.75rem">
+            <label class="form-label">Result unit <span style="color:var(--muted)">(optional)</span></label>
+            <select class="form-select" id="sub-ru"></select>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-danger" onclick="doSubtract()">− Subtract</button>
+          </div>
+          <div class="divider"></div>
+          <div class="result-box" id="sub-result"><span class="result-empty">Result will appear here</span></div>
+        </div>
+
+        <!-- DIVIDE -->
+        <div id="panel-divide" class="op-panel" style="display:none">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Value 1 (dividend)</label>
+              <input class="form-input input-number" id="div-v1" type="number" value="10" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 1</label>
+              <select class="form-select" id="div-u1"></select>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:.75rem">
+            <div class="form-group">
+              <label class="form-label">Value 2 (divisor)</label>
+              <input class="form-input input-number" id="div-v2" type="number" value="2" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 2</label>
+              <select class="form-select" id="div-u2"></select>
+            </div>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-secondary" onclick="doDivide()">÷ Divide</button>
+          </div>
+          <div class="divider"></div>
+          <div class="result-box" id="div-result"><span class="result-empty">Ratio will appear here</span></div>
+        </div>
+
+        <!-- COMPARE -->
+        <div id="panel-compare" class="op-panel" style="display:none">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Value 1</label>
+              <input class="form-input input-number" id="cmp-v1" type="number" value="1" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 1</label>
+              <select class="form-select" id="cmp-u1"></select>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:.75rem">
+            <div class="form-group">
+              <label class="form-label">Value 2</label>
+              <input class="form-input input-number" id="cmp-v2" type="number" value="12" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit 2</label>
+              <select class="form-select" id="cmp-u2"></select>
+            </div>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-secondary" onclick="doCompare()">⇌ Compare</button>
+          </div>
+          <div class="divider"></div>
+          <div id="cmp-result"><span class="result-empty">Comparison result will appear here</span></div>
+        </div>
+
+        <!-- SAVE -->
+        <div id="panel-save" class="op-panel" style="display:none">
+          <p style="color:var(--muted);font-size:.9rem;margin-bottom:1rem">Save a measurement to the database.</p>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Value</label>
+              <input class="form-input input-number" id="save-val" type="number" value="1" step="any">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit</label>
+              <select class="form-select" id="save-unit"></select>
+            </div>
+          </div>
+          <div style="margin-top:1rem">
+            <button class="btn btn-primary" onclick="doSave()">💾 Save measurement</button>
+          </div>
+          <div class="divider"></div>
+          <div id="save-result"><span class="result-empty">Saved measurement will appear here</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+  // ── INIT ─────────────────────────────────────────────────────
+  document.getElementById('nav-root').innerHTML = renderNav('home');
+
+  if (isLoggedIn()) {
+    document.getElementById('app-section').style.display = 'block';
+  } else {
+    document.getElementById('hero-section').style.display = 'block';
+  }
+
+  let currentType = 'length';
+  let currentOp   = 'convert';
+
+  const OP_META = {
+    convert:  { title:'Convert',  desc:'Convert a value from one unit to another',       badge:'badge-blue',  label:'convert' },
+    add:      { title:'Add',      desc:'Add two quantities of the same type',             badge:'badge-green', label:'add' },
+    subtract: { title:'Subtract', desc:'Subtract the second quantity from the first',     badge:'badge-red',   label:'subtract' },
+    divide:   { title:'Divide',   desc:'Divide two quantities — returns a ratio',         badge:'badge-amber', label:'divide' },
+    compare:  { title:'Compare',  desc:'Compare two quantities — returns <, =, or >',    badge:'badge-blue',  label:'compare' },
+    save:     { title:'Save',     desc:'Persist a measurement to the database',           badge:'badge-green', label:'save' }
+  };
+
+  // Build type cards
+  function buildTypeGrid() {
+    document.getElementById('type-grid').innerHTML = Object.entries(TYPE_META).map(([k,v]) =>
+      `<div class="type-card ${k===currentType?'active':''}" onclick="switchType('${k}')">
+        <div class="icon">${v.icon}</div>
+        <div class="label">${v.label}</div>
+      </div>`
+    ).join('');
+  }
+
+  // Build selects for current type
+  function buildSelects() {
+    const units = UNITS[currentType];
+    const sel = (id, idx=0) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = units.map((u,i)=>`<option value="${u}" ${i===idx?'selected':''}>${capitalize(u)}</option>`).join('');
+    };
+    sel('cv-from',0); sel('cv-to',1);
+    sel('add-u1',0);  sel('add-u2',1);  sel('add-ru',0);
+    sel('sub-u1',0);  sel('sub-u2',1);  sel('sub-ru',0);
+    sel('div-u1',0);  sel('div-u2',1);
+    sel('cmp-u1',0);  sel('cmp-u2',1);
+    sel('save-unit',0);
+    // For length/compare: default to FEET and INCHES
+    if (currentType === 'length') {
+      document.getElementById('cmp-u1').value = 'FEET';
+      document.getElementById('cmp-u2').value = 'INCHES';
+    }
+    clearResults();
+  }
+
+  function clearResults() {
+    ['cv-result','add-result','sub-result','div-result'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<span class="result-empty">Result will appear here</span>';
+    });
+    document.getElementById('cmp-result').innerHTML = '<span class="result-empty">Comparison result will appear here</span>';
+    document.getElementById('save-result').innerHTML = '<span class="result-empty">Saved measurement will appear here</span>';
+  }
+
+  function switchType(type) {
+    currentType = type;
+    buildTypeGrid();
+    buildSelects();
+    // Hide temperature for add/subtract
+    const noArith = type === 'temperature';
+    ['add','subtract'].forEach(op => {
+      document.querySelector(`.op-tab[data-op="${op}"]`).style.opacity = noArith ? '.4' : '1';
+      document.querySelector(`.op-tab[data-op="${op}"]`).style.pointerEvents = noArith ? 'none' : 'auto';
+    });
+    if (noArith && (currentOp==='add'||currentOp==='subtract')) switchOp('convert');
+  }
+
+  function switchOp(op) {
+    currentOp = op;
+    document.querySelectorAll('.op-tab').forEach(t => t.classList.toggle('active', t.dataset.op===op));
+    document.querySelectorAll('.op-panel').forEach(p => p.style.display='none');
+    document.getElementById('panel-'+op).style.display='block';
+    const m = OP_META[op];
+    document.getElementById('op-title').textContent = m.title;
+    document.getElementById('op-desc').textContent  = m.desc;
+    const b = document.getElementById('op-badge');
+    b.className = 'badge ' + m.badge;
+    b.textContent = m.label;
+  }
+
+  document.querySelectorAll('.op-tab').forEach(t =>
+    t.addEventListener('click', () => switchOp(t.dataset.op))
+  );
+
+  buildTypeGrid();
+  buildSelects();
+
+  // ── SHOW RESULT ───────────────────────────────────────────────
+  function showResult(id, value, unit) {
+    document.getElementById(id).innerHTML =
+      `<div><span class="result-value">${value}</span> <span class="result-unit">${capitalize(unit)}</span></div>
+       <span class="badge badge-green">✓ done</span>`;
+  }
+  function showRatio(id, ratio) {
+    document.getElementById(id).innerHTML =
+      `<div><span style="font-size:.85rem;color:var(--muted);margin-right:.5rem">ratio</span><span class="result-value">${ratio}</span></div>
+       <span class="badge badge-amber">dimensionless</span>`;
+  }
+  function showCompare(r, label1, label2) {
+    const el = document.getElementById('cmp-result');
+    if (r === 0) {
+      el.innerHTML = `<div class="compare-result compare-eq">= Equal — both quantities are the same</div>`;
+    } else if (r > 0) {
+      el.innerHTML = `<div class="compare-result compare-gt">${label1} &gt; ${label2} — first is greater</div>`;
+    } else {
+      el.innerHTML = `<div class="compare-result compare-lt">${label1} &lt; ${label2} — second is greater</div>`;
+    }
+  }
+
+  // ── OPERATIONS ────────────────────────────────────────────────
+  async function doConvert() {
+    const val = parseFloat(document.getElementById('cv-val').value);
+    const from = document.getElementById('cv-from').value;
+    const to   = document.getElementById('cv-to').value;
+    if (isNaN(val)) { toast('Enter a valid number', 'error'); return; }
+    try {
+      const data = await apiFetch('/api/measurements/convert','POST',{ value:val, fromUnit:from, toUnit:to });
+      showResult('cv-result', data.value, data.unit);
+      addToHistory({ op:'Convert', type:currentType, expr:`${val} ${from} → ${to}`, result:`${data.value} ${data.unit}` });
+      toast('Converted successfully','success');
+    } catch(e) { toast(e.message,'error'); }
+  }
+
+  async function doAdd() {
+    const v1=parseFloat(document.getElementById('add-v1').value);
+    const v2=parseFloat(document.getElementById('add-v2').value);
+    const u1=document.getElementById('add-u1').value;
+    const u2=document.getElementById('add-u2').value;
+    const ru=document.getElementById('add-ru').value;
+    if (isNaN(v1)||isNaN(v2)) { toast('Enter valid numbers','error'); return; }
+    try {
+      const data = await apiFetch('/api/measurements/add','POST',{ value1:v1,unit1:u1,value2:v2,unit2:u2,resultUnit:ru });
+      showResult('add-result', data.value, data.unit);
+      addToHistory({ op:'Add', type:currentType, expr:`${v1} ${u1} + ${v2} ${u2}`, result:`${data.value} ${data.unit}` });
+      toast('Added successfully','success');
+    } catch(e) { toast(e.message,'error'); }
+  }
+
+  async function doSubtract() {
+    const v1=parseFloat(document.getElementById('sub-v1').value);
+    const v2=parseFloat(document.getElementById('sub-v2').value);
+    const u1=document.getElementById('sub-u1').value;
+    const u2=document.getElementById('sub-u2').value;
+    const ru=document.getElementById('sub-ru').value;
+    if (isNaN(v1)||isNaN(v2)) { toast('Enter valid numbers','error'); return; }
+    try {
+      const data = await apiFetch('/api/measurements/subtract','POST',{ value1:v1,unit1:u1,value2:v2,unit2:u2,resultUnit:ru });
+      showResult('sub-result', data.value, data.unit);
+      addToHistory({ op:'Subtract', type:currentType, expr:`${v1} ${u1} − ${v2} ${u2}`, result:`${data.value} ${data.unit}` });
+      toast('Subtracted successfully','success');
+    } catch(e) { toast(e.message,'error'); }
+  }
+
+  async function doDivide() {
+    const v1=parseFloat(document.getElementById('div-v1').value);
+    const v2=parseFloat(document.getElementById('div-v2').value);
+    const u1=document.getElementById('div-u1').value;
+    const u2=document.getElementById('div-u2').value;
+    if (isNaN(v1)||isNaN(v2)) { toast('Enter valid numbers','error'); return; }
+    try {
+      const data = await apiFetch('/api/measurements/divide','POST',{ value1:v1,unit1:u1,value2:v2,unit2:u2 });
+      showRatio('div-result', data.ratio);
+      addToHistory({ op:'Divide', type:currentType, expr:`${v1} ${u1} ÷ ${v2} ${u2}`, result:`ratio: ${data.ratio}` });
+      toast('Divided successfully','success');
+    } catch(e) { toast(e.message,'error'); }
+  }
+
+  async function doCompare() {
+    const v1=parseFloat(document.getElementById('cmp-v1').value);
+    const v2=parseFloat(document.getElementById('cmp-v2').value);
+    const u1=document.getElementById('cmp-u1').value;
+    const u2=document.getElementById('cmp-u2').value;
+    if (isNaN(v1)||isNaN(v2)) { toast('Enter valid numbers','error'); return; }
+    try {
+      const data = await apiFetch('/api/measurements/compare','POST',{ value1:v1,unit1:u1,value2:v2,unit2:u2 });
+      showCompare(data.result, `${v1} ${u1}`, `${v2} ${u2}`);
+      const sym = data.result===0?'=':data.result>0?'>':'<';
+      addToHistory({ op:'Compare', type:currentType, expr:`${v1} ${u1} vs ${v2} ${u2}`, result:sym });
+    } catch(e) { toast(e.message,'error'); }
+  }
+
+  async function doSave() {
+    const val=parseFloat(document.getElementById('save-val').value);
+    const unit=document.getElementById('save-unit').value;
+    if (isNaN(val)) { toast('Enter a valid number','error'); return; }
+    try {
+      const data = await apiFetch('/api/measurements','POST',{ value:val, unit });
+      document.getElementById('save-result').innerHTML =
+        `<div class="result-box">
+           <div><span class="result-value">${data.value}</span> <span class="result-unit">${capitalize(data.unitName)}</span></div>
+           <span class="badge badge-green">ID: ${data.id}</span>
+         </div>`;
+      toast('Measurement saved to DB','success');
+    } catch(e) { toast(e.message,'error'); }
+  }
+</script>
+</body>
+</html>
