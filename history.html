@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>History — Quanment</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="container page">
+
+  <div class="row" style="margin-bottom:1.25rem">
+    <div>
+      <h1 style="font-size:1.4rem;font-weight:600;letter-spacing:-.02em">History</h1>
+      <p style="color:var(--muted);font-size:.88rem;margin-top:2px">Your recent calculations and conversions</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-secondary btn-sm" onclick="loadDB()">↻ Load from DB</button>
+    <button class="btn btn-danger btn-sm" onclick="doClear()">Clear local</button>
+  </div>
+
+  <!-- Local history -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-header">
+      <div>
+        <p class="card-title">Session history</p>
+        <p class="card-sub">Calculations from this browser session</p>
+      </div>
+      <span class="badge badge-blue" id="local-count">0 entries</span>
+    </div>
+    <div id="local-table-wrap">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <p>No calculations yet. Head to the <a href="index.html" style="color:var(--accent)">home page</a> to get started.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DB measurements -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <p class="card-title">Saved measurements</p>
+        <p class="card-sub">Measurements persisted to the database</p>
+      </div>
+      <span class="badge badge-green" id="db-count">—</span>
+    </div>
+    <div id="db-table-wrap">
+      <div class="empty">
+        <div class="empty-icon">💾</div>
+        <p>Click "Load from DB" to fetch saved measurements.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+  document.getElementById('nav-root').innerHTML = renderNav('history');
+  requireAuth();
+
+  const OP_BADGE = {
+    Convert:  'badge-blue',
+    Add:      'badge-green',
+    Subtract: 'badge-red',
+    Divide:   'badge-amber',
+    Compare:  'badge-blue',
+    Save:     'badge-green'
+  };
+
+  function renderLocal() {
+    const history = getHistory();
+    document.getElementById('local-count').textContent = history.length + ' entries';
+
+    if (!history.length) {
+      document.getElementById('local-table-wrap').innerHTML =
+        `<div class="empty"><div class="empty-icon">📋</div>
+         <p>No calculations yet. Head to the <a href="index.html" style="color:var(--accent)">home page</a> to get started.</p></div>`;
+      return;
+    }
+
+    document.getElementById('local-table-wrap').innerHTML =
+      `<div style="overflow-x:auto">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>Type</th>
+              <th>Expression</th>
+              <th>Result</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${history.map(h => `
+              <tr>
+                <td><span class="badge ${OP_BADGE[h.op]||'badge-blue'}">${h.op}</span></td>
+                <td style="text-transform:capitalize;color:var(--muted)">${h.type||'—'}</td>
+                <td class="mono">${h.expr}</td>
+                <td class="mono" style="color:var(--green)">${h.result}</td>
+                <td style="color:var(--muted);font-size:.8rem">${formatTime(h.time)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  async function loadDB() {
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = 'Loading…';
+    try {
+      const data = await apiFetch('/api/measurements');
+      document.getElementById('db-count').textContent = (data||[]).length + ' saved';
+
+      if (!data || !data.length) {
+        document.getElementById('db-table-wrap').innerHTML =
+          `<div class="empty"><div class="empty-icon">💾</div><p>No measurements saved yet.</p></div>`;
+        return;
+      }
+
+      document.getElementById('db-table-wrap').innerHTML =
+        `<div style="overflow-x:auto">
+          <table class="history-table">
+            <thead>
+              <tr><th>ID</th><th>Value</th><th>Unit</th></tr>
+            </thead>
+            <tbody>
+              ${data.map(m => `
+                <tr>
+                  <td style="color:var(--muted)" class="mono">#${m.id}</td>
+                  <td class="mono" style="color:var(--green)">${m.value}</td>
+                  <td style="text-transform:capitalize">${capitalize(m.unitName||'')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      toast('Loaded ' + data.length + ' measurements', 'success');
+    } catch(e) {
+      toast(e.message, 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = '↻ Load from DB';
+    }
+  }
+
+  function doClear() {
+    if (!confirm('Clear all local session history?')) return;
+    clearHistory();
+    renderLocal();
+    toast('Local history cleared', 'info');
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + ' ' +
+           d.toLocaleDateString([], { month:'short', day:'numeric' });
+  }
+
+  renderLocal();
+</script>
+</body>
+</html>
